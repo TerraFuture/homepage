@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from 'next'
-import { Poppins } from 'next/font/google'
+import { Noto_Sans_KR } from 'next/font/google'
 import './globals.css'
 
-const poppins = Poppins({
+const notoSansKR = Noto_Sans_KR({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-poppins',
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-noto-sans-kr',
 })
 
 export const metadata: Metadata = {
@@ -36,7 +36,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body className={`${poppins.variable} font-sans antialiased`}>{children}</body>
+      <body className={`${notoSansKR.variable} font-sans antialiased`}>{children}</body>
     </html>
   )
 }
