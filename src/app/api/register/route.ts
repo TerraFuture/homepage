@@ -3,6 +3,14 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
+    // Supabase 연결 확인
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database connection not configured' },
+        { status: 500 }
+      )
+    }
+
     const data = await request.json()
     
     // 필수 필드 검증

@@ -1,14 +1,24 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+// 환경변수 체크
+if (!supabaseUrl) {
+  console.error('NEXT_PUBLIC_SUPABASE_URL is required')
+}
+if (!supabaseAnonKey) {
+  console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY is required')
+}
 
 // 클라이언트용 (브라우저)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = supabaseUrl && supabaseAnonKey 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null
 
 // 서버용 (SERVICE_ROLE_KEY가 있을 때만)
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-export const supabaseAdmin = supabaseServiceKey 
+export const supabaseAdmin = supabaseServiceKey && supabaseUrl
   ? createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
