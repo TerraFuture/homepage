@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --company-primary: #2563eb;
+  --company-secondary: #64748b;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.company-primary {
+  @apply text-blue-600;
+}
+
+.company-bg {
+  @apply bg-blue-600;
+}
