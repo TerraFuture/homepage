@@ -1,10 +1,267 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function RegisterPage() {
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [validationErrors, setValidationErrors] = useState({
+    email: '',
+    phone: ''
+  })
+  const [formData, setFormData] = useState({
+    // 기본 정보
+    nickname: '',
+    name: '',
+    phone: '',
+    email: '',
+    email_id: '',
+    email_domain: 'gmail.com', // 기본값 설정
+    region: '서울', // 기본값 설정
+    region_other: '',
+    
+    // 커뮤니케이션
+    communication: ['카카오톡'], // 기본값 설정
+    communication_other: '',
+    
+    // 경력 정보
+    career_years: '5-10년', // 기본값 설정
+    
+    // 희망 역할/포지션
+    preferred_roles: [] as string[],
+    preferred_industries: [] as string[],
+    
+    // 관심 분야
+    interests: [] as string[],
+    
+    // 기술 스택
+    tech_stack: '',
+    
+    // 기술 숙련도
+    ai_level: '중급', // 기본값 설정
+    web_level: '중급', // 기본값 설정
+    design_level: '입문', // 기본값 설정
+    pm_level: '보조 가능', // 기본값 설정
+    
+    // 언어 능력
+    english_level: '초급', // 기본값 설정
+    japanese_level: '없음', // 기본값 설정
+    chinese_level: '없음', // 기본값 설정
+    
+    // 자격증
+    certifications: '',
+    
+    // 학력
+    education_level: '',
+    education_major: '',
+    
+    // 프로젝트 참여 조건
+    available_days: ['월', '화', '수', '목', '금'], // 기본값 설정 (월~금)
+    day_preference: ['주중만 가능'], // 기본값 설정
+    available_times: ['시간대 상관 없음'], // 기본값 설정
+    available_times_custom: '',
+    max_duration: '상시 가능', // 기본값 설정
+    work_environment: ['상관 없음'], // 기본값 설정
+    
+    // 가용성
+    availability_status: '즉시 가능', // 기본값 설정
+    contact_hours: ['언제든지'], // 기본값 설정
+    
+    // 작업 스타일
+    work_style: ['지시가 명확한 업무를 선호'], // 기본값 설정
+    work_style_other: '',
+    
+    // 지원 동기
+    motivation: ''
+  })
+
+  // 컴포넌트 마운트시 기본 이메일 설정
+  useEffect(() => {
+    if (formData.email_domain && !formData.email) {
+      setFormData(prev => ({
+        ...prev,
+        email: prev.email_id ? `${prev.email_id}@${prev.email_domain}` : ''
+      }))
+    }
+  }, [])
+
+  // 이메일 정규식 검증
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    return emailRegex.test(email)
+  }
+
+  // 휴대폰 번호 정규식 검증 (한국 휴대폰 번호 체계)
+  const validatePhone = (phone: string): boolean => {
+    // 010으로 시작하는 11자리 또는 011,016,017,018,019로 시작하는 10-11자리
+    const phoneRegex = /^010[0-9]{8}$|^01[1-9][0-9]{7,8}$/
+    return phoneRegex.test(phone)
+  }
+
+  // 휴대폰 번호 입력 처리 (숫자만 허용)
+  const handlePhoneChange = (value: string) => {
+    // 숫자만 추출
+    const numbersOnly = value.replace(/[^0-9]/g, '')
+    
+    // 11자리까지만 허용
+    const limitedNumbers = numbersOnly.slice(0, 11)
+    
+    setFormData(prev => ({ ...prev, phone: limitedNumbers }))
+    
+    // 실시간 검증
+    if (limitedNumbers.length >= 10) {
+      const isValid = validatePhone(limitedNumbers)
+      setValidationErrors(prev => ({
+        ...prev,
+        phone: isValid ? '' : '올바른 한국 휴대폰 번호를 입력해주세요 (예: 01012345678)'
+      }))
+    } else if (limitedNumbers.length > 0) {
+      setValidationErrors(prev => ({
+        ...prev,
+        phone: '휴대폰 번호는 10-11자리여야 합니다'
+      }))
+    } else {
+      setValidationErrors(prev => ({ ...prev, phone: '' }))
+    }
+  }
+
+  // 이메일 검증 처리
+  const handleEmailValidation = (email: string) => {
+    if (email.length > 0) {
+      const isValid = validateEmail(email)
+      setValidationErrors(prev => ({
+        ...prev,
+        email: isValid ? '' : '올바른 이메일 형식을 입력해주세요'
+      }))
+    } else {
+      setValidationErrors(prev => ({ ...prev, email: '' }))
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // 최종 검증
+    const nicknameValid = formData.nickname && formData.nickname.trim() !== ''
+    const emailValid = formData.email && validateEmail(formData.email)
+    const phoneValid = validatePhone(formData.phone)
+    const motivationValid = formData.motivation && formData.motivation.trim() !== ''
+    
+    if (!nicknameValid || !emailValid || !phoneValid || !motivationValid) {
+      alert('모든 필수 필드를 올바르게 입력해주세요:\n- 닉네임\n- 실명\n- 이메일\n- 휴대폰 번호\n- 지원 동기')
+      return
+    }
+    
+    setValidationErrors({
+      email: !emailValid ? '올바른 이메일 형식을 입력해주세요' : '',
+      phone: !phoneValid ? '올바른 한국 휴대폰 번호를 입력해주세요' : ''
+    })
+    
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        router.push('/register/complete')
+      } else {
+        alert(result.error || '등록 중 오류가 발생했습니다.')
+      }
+    } catch (error) {
+      console.error('등록 오류:', error)
+      alert('등록 중 오류가 발생했습니다.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // 다양한 폼 타입 처리를 위한 핸들러
+  const handleInputChange = (name: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  // 체크박스 배열 처리 핸들러
+  const handleCheckboxChange = (name: string, value: string, checked: boolean) => {
+    setFormData(prev => {
+      const currentArray = prev[name as keyof typeof prev] as string[] || []
+      let newState = { ...prev }
+      
+      if (checked) {
+        (newState as any)[name] = [...currentArray, value]
+      } else {
+        (newState as any)[name] = currentArray.filter(item => item !== value)
+      }
+
+      // 요일 선택 자동화 로직
+      if (name === 'day_preference') {
+        if (value === '주중만 가능' && checked) {
+          // 주중만 가능 선택시 월~금 자동 선택
+          newState.available_days = ['월', '화', '수', '목', '금']
+          // 다른 옵션들 해제
+          newState.day_preference = ['주중만 가능']
+        } else if (value === '주말만 가능' && checked) {
+          // 주말만 가능 선택시 토~일 자동 선택
+          newState.available_days = ['토', '일']
+          // 다른 옵션들 해제
+          newState.day_preference = ['주말만 가능']
+        } else if (value === '상관 없음' && checked) {
+          // 상관 없음 선택시 월~일 자동 선택
+          newState.available_days = ['월', '화', '수', '목', '금', '토', '일']
+          // 다른 옵션들 해제
+          newState.day_preference = ['상관 없음']
+        }
+      }
+
+      return newState
+    })
+  }
+
+  // 라디오 버튼 처리 핸들러
+  const handleRadioChange = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  // 이메일 조합 핸들러
+  const handleEmailChange = (field: 'email_id' | 'email_domain', value: string) => {
+    setFormData(prev => {
+      const newEmailId = field === 'email_id' ? value : prev.email_id
+      const newEmailDomain = field === 'email_domain' ? value : prev.email_domain
+      const fullEmail = newEmailId && newEmailDomain ? `${newEmailId}@${newEmailDomain}` : ''
+      
+      // 완성된 이메일이 있으면 검증 실행
+      if (fullEmail) {
+        handleEmailValidation(fullEmail)
+      } else {
+        setValidationErrors(prev => ({ ...prev, email: '' }))
+      }
+      
+      return {
+        ...prev,
+        [field]: value,
+        email: fullEmail
+      }
+    })
+  }
   return (
-    <main className="min-h-screen bg-white">
-      <div className="max-w-[1000px] mx-auto px-4 md:px-8 py-8 md:py-16">
+    <main className="min-h-screen bg-white overflow-x-hidden">
+      <div className="max-w-[1000px] mx-auto px-4 md:px-8 py-8 md:py-16 break-words">
         
         {/* 헤더 */}
         <div className="flex justify-between items-start mb-8">
@@ -32,7 +289,7 @@ export default function RegisterPage() {
         <div className="w-full h-px bg-gray-300 mb-12"></div>
 
         {/* 등록 폼 */}
-        <form className="space-y-12">
+        <form className="space-y-12" onSubmit={handleSubmit}>
           
           {/* 기본 정보 */}
           <section>
@@ -44,43 +301,137 @@ export default function RegisterPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 tracking-tight">
-                  닉네임
+                  닉네임 (필수)
                 </label>
                 <input
                   type="text"
+                  value={formData.nickname}
+                  onChange={(e) => handleInputChange('nickname', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:border-gray-400 focus:outline-none"
                   placeholder="프로젝트에서 사용할 닉네임"
+                  required
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 tracking-tight">
-                  실명(비공개)
+                  실명(필수)
                 </label>
                 <input
                   type="text"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:border-gray-400 focus:outline-none"
                   placeholder="본명"
+                  required
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 tracking-tight">
-                  이메일(비공개)
+                  이메일(필수)
                 </label>
-                <input
-                  type="email"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:border-gray-400 focus:outline-none"
-                  placeholder="your@email.com"
-                />
+                <div className="space-y-2 md:space-y-0 md:flex md:items-center md:gap-2">
+                  <input
+                    type="text"
+                    value={formData.email_id}
+                    onChange={(e) => handleEmailChange('email_id', e.target.value)}
+                    className={`w-full md:flex-1 px-4 py-3 border rounded-md text-sm focus:outline-none ${
+                      validationErrors.email 
+                        ? 'border-red-500 focus:border-red-500' 
+                        : 'border-gray-300 focus:border-gray-400'
+                    }`}
+                    placeholder="이메일 아이디"
+                    required
+                  />
+                  <div className="flex items-center justify-center md:hidden py-1">
+                    <span className="text-gray-400 text-xs">@</span>
+                  </div>
+                  <span className="hidden md:inline text-gray-500 text-sm">@</span>
+                  <div className="relative w-full md:flex-1">
+                    <select
+                      value={formData.email_domain}
+                      onChange={(e) => handleEmailChange('email_domain', e.target.value)}
+                      className={`w-full px-4 py-3 pr-10 border rounded-md text-sm focus:outline-none bg-white appearance-none cursor-pointer ${
+                        validationErrors.email 
+                          ? 'border-red-500 focus:border-red-500' 
+                          : 'border-gray-300 focus:border-gray-400'
+                      }`}
+                      style={{ appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none' }}
+                      required
+                    >
+                      <option value="gmail.com">gmail.com</option>
+                      <option value="naver.com">naver.com</option>
+                      <option value="daum.net">daum.net</option>
+                      <option value="kakao.com">kakao.com</option>
+                      <option value="hanmail.net">hanmail.net</option>
+                      <option value="nate.com">nate.com</option>
+                      <option value="outlook.com">outlook.com</option>
+                      <option value="hotmail.com">hotmail.com</option>
+                      <option value="yahoo.com">yahoo.com</option>
+                      <option value="icloud.com">icloud.com</option>
+                      <option value="direct">직접입력</option>
+                    </select>
+                    {/* 커스텀 드롭다운 화살표 */}
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <svg 
+                        className="w-4 h-4 text-gray-400" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                {formData.email_domain === 'direct' && (
+                  <div className="mt-2">
+                    <input
+                      type="text"
+                      value={formData.email_domain === 'direct' ? '' : formData.email_domain}
+                      onChange={(e) => handleEmailChange('email_domain', e.target.value)}
+                      className={`w-full px-4 py-3 border rounded-md text-sm focus:outline-none ${
+                        validationErrors.email 
+                          ? 'border-red-500 focus:border-red-500' 
+                          : 'border-gray-300 focus:border-gray-400'
+                      }`}
+                      placeholder="도메인을 직접 입력하세요 (예: company.com)"
+                    />
+                  </div>
+                )}
+                {formData.email && (
+                  <p className="text-xs text-gray-500 mt-1">완성된 이메일: {formData.email}</p>
+                )}
+                {validationErrors.email && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.email}</p>
+                )}
+                {formData.email && !validationErrors.email && formData.email.length > 0 && (
+                  <p className="text-green-600 text-xs mt-1">✓ 올바른 이메일 형식입니다</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 tracking-tight">
-                  휴대폰 번호(비공개)
+                  휴대폰 번호(필수 - 숫자만 입력)
                 </label>
                 <input
                   type="tel"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:border-gray-400 focus:outline-none"
-                  placeholder="010-0000-0000"
+                  value={formData.phone}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  className={`w-full px-4 py-3 border rounded-md text-sm focus:outline-none ${
+                    validationErrors.phone 
+                      ? 'border-red-500 focus:border-red-500' 
+                      : 'border-gray-300 focus:border-gray-400'
+                  }`}
+                  placeholder="01012345678 (숫자만 입력)"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  required
                 />
+                {validationErrors.phone && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.phone}</p>
+                )}
+                {formData.phone && !validationErrors.phone && formData.phone.length >= 10 && (
+                  <p className="text-green-600 text-xs mt-1">✓ 올바른 휴대폰 번호입니다</p>
+                )}
               </div>
             </div>
             <div className="mt-6">
@@ -90,16 +441,32 @@ export default function RegisterPage() {
               <div className="flex flex-wrap gap-4">
                 {['서울', '경기', '지방', '해외'].map((region) => (
                   <label key={region} className="flex items-center">
-                    <input type="radio" name="region" value={region} className="mr-2" />
+                    <input 
+                      type="radio" 
+                      name="region" 
+                      value={region} 
+                      checked={formData.region === region}
+                      onChange={(e) => handleRadioChange('region', e.target.value)}
+                      className="mr-2" 
+                    />
                     <span className="text-sm text-gray-700">{region}</span>
                   </label>
                 ))}
                 <div className="flex items-center">
-                  <input type="radio" name="region" value="기타" className="mr-2" />
+                  <input 
+                    type="radio" 
+                    name="region" 
+                    value="기타" 
+                    checked={formData.region === '기타'}
+                    onChange={(e) => handleRadioChange('region', e.target.value)}
+                    className="mr-2" 
+                  />
                   <span className="text-sm text-gray-700 mr-2">기타:</span>
                   <input
                     type="text"
-                    className="px-2 py-1 border border-gray-300 rounded text-sm w-20"
+                    value={formData.region_other}
+                    onChange={(e) => handleInputChange('region_other', e.target.value)}
+                    className="px-2 py-1 border border-gray-300 rounded text-sm min-w-[80px] flex-1 max-w-[120px]"
                     placeholder="직접입력"
                   />
                 </div>
@@ -123,16 +490,32 @@ export default function RegisterPage() {
                 <div className="flex flex-wrap gap-4">
                   {['휴대폰', '카카오톡', 'Zoom/Meet', '이메일'].map((tool) => (
                     <label key={tool} className="flex items-center">
-                      <input type="checkbox" name="communication" value={tool} className="mr-2" />
+                      <input 
+                        type="checkbox" 
+                        name="communication" 
+                        value={tool} 
+                        checked={formData.communication.includes(tool)}
+                        onChange={(e) => handleCheckboxChange('communication', tool, e.target.checked)}
+                        className="mr-2" 
+                      />
                       <span className="text-sm text-gray-700">{tool}</span>
                     </label>
                   ))}
                   <div className="flex items-center">
-                    <input type="checkbox" name="communication" value="기타" className="mr-2" />
+                    <input 
+                      type="checkbox" 
+                      name="communication" 
+                      value="기타" 
+                      checked={formData.communication.includes('기타')}
+                      onChange={(e) => handleCheckboxChange('communication', '기타', e.target.checked)}
+                      className="mr-2" 
+                    />
                     <span className="text-sm text-gray-700 mr-2">기타:</span>
                     <input
                       type="text"
-                      className="px-2 py-1 border border-gray-300 rounded text-sm w-20"
+                      value={formData.communication_other}
+                      onChange={(e) => handleInputChange('communication_other', e.target.value)}
+                      className="px-2 py-1 border border-gray-300 rounded text-sm min-w-[80px] flex-1 max-w-[120px]"
                       placeholder="직접입력"
                     />
                   </div>
@@ -157,7 +540,14 @@ export default function RegisterPage() {
               <div className="flex flex-wrap gap-4">
                 {['신입', '1년 미만', '1-3년', '3-5년', '5-10년', '10-15년', '20년 이상'].map((experience) => (
                   <label key={experience} className="flex items-center py-1">
-                    <input type="radio" name="experience_years" value={experience} className="mr-3" />
+                    <input 
+                      type="radio" 
+                      name="career_years" 
+                      value={experience} 
+                      checked={formData.career_years === experience}
+                      onChange={(e) => handleRadioChange('career_years', e.target.value)}
+                      className="mr-3" 
+                    />
                     <span className="text-sm text-gray-700">{experience}</span>
                   </label>
                 ))}
@@ -194,7 +584,14 @@ export default function RegisterPage() {
                     '강사/멘토'
                   ].map((role) => (
                     <label key={role} className="flex items-center py-1">
-                      <input type="checkbox" name="preferred_roles" value={role} className="mr-3" />
+                      <input 
+                        type="checkbox" 
+                        name="preferred_roles" 
+                        value={role} 
+                        checked={formData.preferred_roles.includes(role)}
+                        onChange={(e) => handleCheckboxChange('preferred_roles', role, e.target.checked)}
+                        className="mr-3" 
+                      />
                       <span className="text-sm text-gray-700">{role}</span>
                     </label>
                   ))}
@@ -223,7 +620,14 @@ export default function RegisterPage() {
                     '상관없음'
                   ].map((industry) => (
                     <label key={industry} className="flex items-center py-1">
-                      <input type="checkbox" name="preferred_industries" value={industry} className="mr-3" />
+                      <input 
+                        type="checkbox" 
+                        name="preferred_industries" 
+                        value={industry} 
+                        checked={formData.preferred_industries.includes(industry)}
+                        onChange={(e) => handleCheckboxChange('preferred_industries', industry, e.target.checked)}
+                        className="mr-3" 
+                      />
                       <span className="text-sm text-gray-700">{industry}</span>
                     </label>
                   ))}
@@ -264,7 +668,14 @@ export default function RegisterPage() {
                 '메타버스 구현 (ENgage 등)'
               ].map((field) => (
                 <label key={field} className="flex items-center py-1">
-                  <input type="checkbox" name="interests" value={field} className="mr-3" />
+                  <input 
+                    type="checkbox" 
+                    name="interests" 
+                    value={field} 
+                    checked={formData.interests.includes(field)}
+                    onChange={(e) => handleCheckboxChange('interests', field, e.target.checked)}
+                    className="mr-3" 
+                  />
                   <span className="text-sm text-gray-700">{field}</span>
                 </label>
               ))}
@@ -284,8 +695,10 @@ export default function RegisterPage() {
               </label>
               <input
                 type="text"
+                value={formData.tech_stack}
+                onChange={(e) => handleInputChange('tech_stack', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:border-gray-400 focus:outline-none"
-                placeholder="예시: Python, FastAPI, React, Docker, OpenAI API, Figma"
+                placeholder="예시: Python, React, Docker, Figma"
               />
                              <p className="text-xs text-gray-500 mt-2 tracking-tight">쉼표(,)로 구분하여 입력해주세요</p>
             </div>
@@ -311,7 +724,14 @@ export default function RegisterPage() {
                   <div className="flex flex-wrap gap-3">
                     {['없음', '입문', '중급', '고급'].map((level) => (
                       <label key={level} className="flex items-center">
-                        <input type="radio" name={skill.name} value={level} className="mr-2" />
+                        <input 
+                          type="radio" 
+                          name={skill.name} 
+                          value={level} 
+                          checked={formData[skill.name as keyof typeof formData] === level}
+                          onChange={(e) => handleRadioChange(skill.name, e.target.value)}
+                          className="mr-2" 
+                        />
                         <span className="text-sm text-gray-700">{level}</span>
                       </label>
                     ))}
@@ -325,7 +745,14 @@ export default function RegisterPage() {
                 <div className="flex flex-wrap gap-3">
                   {['불가능', '보조 가능', '가능'].map((level) => (
                     <label key={level} className="flex items-center">
-                      <input type="radio" name="pm_level" value={level} className="mr-2" />
+                      <input 
+                        type="radio" 
+                        name="pm_level" 
+                        value={level} 
+                        checked={formData.pm_level === level}
+                        onChange={(e) => handleRadioChange('pm_level', e.target.value)}
+                        className="mr-2" 
+                      />
                       <span className="text-sm text-gray-700">{level}</span>
                     </label>
                   ))}
@@ -361,7 +788,14 @@ export default function RegisterPage() {
                       <div className="flex flex-wrap gap-3">
                         {['없음', '초급', '중급', '고급', '원어민'].map((level) => (
                           <label key={level} className="flex items-center">
-                            <input type="radio" name={language.name} value={level} className="mr-2" />
+                            <input 
+                              type="radio" 
+                              name={language.name} 
+                              value={level} 
+                              checked={formData[language.name as keyof typeof formData] === level}
+                              onChange={(e) => handleRadioChange(language.name, e.target.value)}
+                              className="mr-2" 
+                            />
                             <span className="text-sm text-gray-700">{level}</span>
                           </label>
                         ))}
@@ -375,9 +809,11 @@ export default function RegisterPage() {
                   보유 자격증/인증 (선택)
                 </label>
                 <textarea
+                  value={formData.certifications}
+                  onChange={(e) => handleInputChange('certifications', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:border-gray-400 focus:outline-none"
                   rows={3}
-                  placeholder="예시: AWS Solutions Architect, Google Cloud Professional, 정보처리기사, Adobe Certified Expert 등"
+                  placeholder="예시: 정보처리기사, AWS 자격증 등"
                 />
               </div>
             </div>
@@ -399,7 +835,14 @@ export default function RegisterPage() {
                 <div className="flex flex-wrap gap-4">
                   {['고등학교 졸업', '전문대 졸업', '대학교 졸업', '대학원 석사', '대학원 박사', '기타'].map((education) => (
                     <label key={education} className="flex items-center">
-                      <input type="radio" name="education_level" value={education} className="mr-2" />
+                      <input 
+                        type="radio" 
+                        name="education_level" 
+                        value={education} 
+                        checked={formData.education_level === education}
+                        onChange={(e) => handleRadioChange('education_level', e.target.value)}
+                        className="mr-2" 
+                      />
                       <span className="text-sm text-gray-700">{education}</span>
                     </label>
                   ))}
@@ -411,6 +854,8 @@ export default function RegisterPage() {
                 </label>
                 <input
                   type="text"
+                  value={formData.education_major}
+                  onChange={(e) => handleInputChange('education_major', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:border-gray-400 focus:outline-none"
                   placeholder="예시: 컴퓨터공학과, 시각디자인학과, 경영학과 등"
                 />
@@ -435,7 +880,14 @@ export default function RegisterPage() {
                 <div className="flex flex-wrap gap-4">
                   {['월', '화', '수', '목', '금', '토', '일'].map((day) => (
                     <label key={day} className="flex items-center">
-                      <input type="checkbox" name="days" value={day} className="mr-2" />
+                      <input 
+                        type="checkbox" 
+                        name="available_days" 
+                        value={day} 
+                        checked={formData.available_days.includes(day)}
+                        onChange={(e) => handleCheckboxChange('available_days', day, e.target.checked)}
+                        className="mr-2" 
+                      />
                       <span className="text-sm text-gray-700">{day}</span>
                     </label>
                   ))}
@@ -443,7 +895,14 @@ export default function RegisterPage() {
                 <div className="flex flex-wrap gap-4 mt-3">
                   {['주중만 가능', '주말만 가능', '상관 없음'].map((option) => (
                     <label key={option} className="flex items-center">
-                      <input type="checkbox" name="day_preference" value={option} className="mr-2" />
+                      <input 
+                        type="checkbox" 
+                        name="day_preference" 
+                        value={option} 
+                        checked={formData.day_preference.includes(option)}
+                        onChange={(e) => handleCheckboxChange('day_preference', option, e.target.checked)}
+                        className="mr-2" 
+                      />
                       <span className="text-sm text-gray-700">{option}</span>
                     </label>
                   ))}
@@ -463,7 +922,14 @@ export default function RegisterPage() {
                     '시간대 상관 없음'
                   ].map((time) => (
                     <label key={time} className="flex items-center">
-                      <input type="checkbox" name="times" value={time} className="mr-2" />
+                      <input 
+                        type="checkbox" 
+                        name="available_times" 
+                        value={time} 
+                        checked={formData.available_times.includes(time)}
+                        onChange={(e) => handleCheckboxChange('available_times', time, e.target.checked)}
+                        className="mr-2" 
+                      />
                       <span className="text-sm text-gray-700">{time}</span>
                     </label>
                   ))}
@@ -471,6 +937,8 @@ export default function RegisterPage() {
                 <div className="mt-3">
                   <input
                     type="text"
+                    value={formData.available_times_custom}
+                    onChange={(e) => handleInputChange('available_times_custom', e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:border-gray-400 focus:outline-none"
                     placeholder="또는 직접 입력 (예: 평일 오후 2시~6시)"
                   />
@@ -484,7 +952,14 @@ export default function RegisterPage() {
                 <div className="flex flex-wrap gap-4">
                   {['1주 이내', '1~4주', '1개월 이상', '상시 가능', '미정 / 협의 가능'].map((period) => (
                     <label key={period} className="flex items-center">
-                      <input type="radio" name="duration" value={period} className="mr-2" />
+                      <input 
+                        type="radio" 
+                        name="max_duration" 
+                        value={period} 
+                        checked={formData.max_duration === period}
+                        onChange={(e) => handleRadioChange('max_duration', e.target.value)}
+                        className="mr-2" 
+                      />
                       <span className="text-sm text-gray-700">{period}</span>
                     </label>
                   ))}
@@ -504,7 +979,14 @@ export default function RegisterPage() {
                     '상관 없음'
                   ].map((env) => (
                     <label key={env} className="flex items-center">
-                      <input type="checkbox" name="environment" value={env} className="mr-2" />
+                      <input 
+                        type="checkbox" 
+                        name="work_environment" 
+                        value={env} 
+                        checked={formData.work_environment.includes(env)}
+                        onChange={(e) => handleCheckboxChange('work_environment', env, e.target.checked)}
+                        className="mr-2" 
+                      />
                       <span className="text-sm text-gray-700">{env}</span>
                     </label>
                   ))}
@@ -538,7 +1020,14 @@ export default function RegisterPage() {
                     '현재 불가능'
                   ].map((status) => (
                     <label key={status} className="flex items-center">
-                      <input type="radio" name="availability_status" value={status} className="mr-2" />
+                      <input 
+                        type="radio" 
+                        name="availability_status" 
+                        value={status} 
+                        checked={formData.availability_status === status}
+                        onChange={(e) => handleRadioChange('availability_status', e.target.value)}
+                        className="mr-2" 
+                      />
                       <span className="text-sm text-gray-700">{status}</span>
                     </label>
                   ))}
@@ -557,7 +1046,14 @@ export default function RegisterPage() {
                     '언제든지'
                   ].map((time) => (
                     <label key={time} className="flex items-center">
-                      <input type="checkbox" name="contact_hours" value={time} className="mr-2" />
+                      <input 
+                        type="checkbox" 
+                        name="contact_hours" 
+                        value={time} 
+                        checked={formData.contact_hours.includes(time)}
+                        onChange={(e) => handleCheckboxChange('contact_hours', time, e.target.checked)}
+                        className="mr-2" 
+                      />
                       <span className="text-sm text-gray-700">{time}</span>
                     </label>
                   ))}
@@ -581,7 +1077,14 @@ export default function RegisterPage() {
                 '작은 단위로 분리된 업무를 선호'
               ].map((style) => (
                 <label key={style} className="flex items-center">
-                  <input type="checkbox" name="work_style" value={style} className="mr-3" />
+                  <input 
+                    type="checkbox" 
+                    name="work_style" 
+                    value={style} 
+                    checked={formData.work_style.includes(style)}
+                    onChange={(e) => handleCheckboxChange('work_style', style, e.target.checked)}
+                    className="mr-3" 
+                  />
                   <span className="text-sm text-gray-700">{style}</span>
                 </label>
               ))}
@@ -591,6 +1094,8 @@ export default function RegisterPage() {
                 기타 설명 (선택)
               </label>
               <textarea
+                value={formData.work_style_other}
+                onChange={(e) => handleInputChange('work_style_other', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:border-gray-400 focus:outline-none"
                 rows={3}
                 placeholder="추가로 설명하고 싶은 작업 스타일이 있다면 입력해주세요"
@@ -611,12 +1116,15 @@ export default function RegisterPage() {
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2 tracking-tight">
-                지원 동기나 각오 (선택 입력)
+                지원 동기나 각오 (필수)
               </label>
               <textarea
+                value={formData.motivation}
+                onChange={(e) => handleInputChange('motivation', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:border-gray-400 focus:outline-none"
                 rows={4}
                 placeholder="테라퓨처 프로젝트에 참여하고 싶은 이유나 각오를 자유롭게 작성해주세요"
+                required
               />
             </div>
           </section>
@@ -630,12 +1138,13 @@ export default function RegisterPage() {
             >
               ← 메인으로 돌아가기
             </Link>
-            <Link
-              href="/register/complete"
-              className="flex-1 md:flex-none bg-black text-white py-4 px-8 rounded-md text-sm font-medium hover:bg-gray-800 transition duration-200 text-center"
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 md:flex-none bg-black text-white py-4 px-8 rounded-md text-sm font-medium hover:bg-gray-800 transition duration-200 text-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              등록 완료
-            </Link>
+              {isSubmitting ? '등록 중...' : '등록 완료'}
+            </button>
           </div>
         </form>
 
