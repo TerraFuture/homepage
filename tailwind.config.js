@@ -13,7 +13,10 @@ module.exports = {
           secondary: '#64748b',
           accent: '#10b981',
         }
-      }
+      },
+      fontFamily: {
+        sans: ['var(--font-poppins)', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif'],
+      },
     },
   },
   plugins: [],
