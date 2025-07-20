@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 회사명 공식 홈페이지
 
 > **검증된 버전**: bigdata/website 기반으로 구축
@@ -35,3 +36,7 @@ npm run dev
 - [ ] Phase 6: 이메일 수집 시스템
 - [ ] Phase 7: 최종 설정 및 배포
 - [ ] Phase 8: 마무리 및 문서화
+=======
+# homepage
+Official Company Website
+>>>>>>> ff3c596b45c43f1854accbb7a44914fdf1fd6559
