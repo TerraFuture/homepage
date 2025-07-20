@@ -30,6 +30,9 @@ export default function RegisterPage() {
     // 경력 정보
     career_years: '5-10년', // 기본값 설정
     
+    // 업무 형태
+    work_type: '프리랜서', // 기본값 설정
+    
     // 희망 역할/포지션
     preferred_roles: [] as string[],
     preferred_industries: [] as string[],
@@ -549,6 +552,28 @@ export default function RegisterPage() {
                       className="mr-3" 
                     />
                     <span className="text-sm text-gray-700">{experience}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            
+            {/* 업무 형태 */}
+            <div className="mt-8">
+              <label className="block text-sm font-semibold text-gray-700 mb-2 tracking-tight">
+                선호하는 업무 형태
+              </label>
+              <div className="flex flex-wrap gap-4">
+                {['프리랜서', '단기 알바', '정규직', '계약직'].map((type) => (
+                  <label key={type} className="flex items-center py-1">
+                    <input 
+                      type="radio" 
+                      name="work_type" 
+                      value={type} 
+                      checked={formData.work_type === type}
+                      onChange={(e) => handleRadioChange('work_type', e.target.value)}
+                      className="mr-3" 
+                    />
+                    <span className="text-sm text-gray-700">{type}</span>
                   </label>
                 ))}
               </div>

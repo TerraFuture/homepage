@@ -39,6 +39,9 @@ export interface TalentData {
   // 경력 정보
   career_years?: string
   
+  // 업무 형태
+  work_type?: string
+  
   // 희망 역할/포지션
   preferred_roles?: string[]
   preferred_industries?: string[]

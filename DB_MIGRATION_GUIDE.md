@@ -8,6 +8,7 @@
 ### 추가된 필드들
 - **기본 정보**: `nickname`, `region`, `region_other`
 - **커뮤니케이션**: `communication`, `communication_other`  
+- **업무 형태**: `work_type`
 - **관심 분야**: `interests`
 - **기술**: `tech_stack`, `ai_level`, `web_level`, `design_level`, `pm_level`
 - **언어**: `english_level`, `japanese_level`, `chinese_level`
@@ -53,6 +54,7 @@ ALTER TABLE talents ADD COLUMN region VARCHAR(50);
 ALTER TABLE talents ADD COLUMN region_other VARCHAR(100);
 ALTER TABLE talents ADD COLUMN communication TEXT[];
 ALTER TABLE talents ADD COLUMN communication_other VARCHAR(100);
+ALTER TABLE talents ADD COLUMN work_type VARCHAR(20);
 ALTER TABLE talents ADD COLUMN interests TEXT[];
 ALTER TABLE talents ADD COLUMN tech_stack TEXT;
 ALTER TABLE talents ADD COLUMN ai_level VARCHAR(20);

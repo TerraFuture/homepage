@@ -29,6 +29,9 @@ CREATE TABLE talents (
   -- 경력 정보
   career_years VARCHAR(50), -- '5-10년' 형태
   
+  -- 업무 형태
+  work_type VARCHAR(20), -- '프리랜서', '단기 알바', '정규직', '계약직'
+  
   -- 희망 역할/포지션
   preferred_roles TEXT[], -- 배열: ['프론트엔드 개발자', 'AI/ML 엔지니어' 등]
   preferred_industries TEXT[], -- 배열: ['핀테크/금융', '헬스케어/의료' 등]
@@ -82,6 +85,7 @@ CREATE INDEX idx_talents_phone ON talents(phone);
 CREATE INDEX idx_talents_email ON talents(email);
 CREATE INDEX idx_talents_created_at ON talents(created_at);
 CREATE INDEX idx_talents_career_years ON talents(career_years);
+CREATE INDEX idx_talents_work_type ON talents(work_type);
 CREATE INDEX idx_talents_availability_status ON talents(availability_status);
 
 -- 5. RLS (Row Level Security) 설정
@@ -114,4 +118,5 @@ COMMENT ON COLUMN talents.nickname IS '프로젝트용 닉네임';
 COMMENT ON COLUMN talents.name IS '실명 (비공개)';
 COMMENT ON COLUMN talents.phone IS '휴대폰 번호 (비공개, 고유값)';
 COMMENT ON COLUMN talents.email IS '이메일 주소 (비공개)';
+COMMENT ON COLUMN talents.work_type IS '선호하는 업무 형태 (프리랜서, 단기 알바, 정규직, 계약직)';
 COMMENT ON COLUMN talents.motivation IS '지원 동기 및 각오'; 

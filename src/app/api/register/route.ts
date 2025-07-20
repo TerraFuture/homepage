@@ -65,6 +65,9 @@ export async function POST(request: NextRequest) {
       // 경력 정보
       career_years: data.career_years || null,
       
+      // 업무 형태
+      work_type: data.work_type || null,
+      
       // 희망 역할/포지션
       preferred_roles: data.preferred_roles || [],
       preferred_industries: data.preferred_industries || [],
